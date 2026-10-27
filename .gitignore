@@ -1,0 +1,18 @@
+# Never commit login sessions, credentials, or local configuration.
+.env
+.env.*
+!.env.example
+*cookie*
+*.har
+*.log
+.DS_Store
+__pycache__/
+.venv/
+
+# Local database instances and editor files are not submission sources.
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+.idea/
+.vscode/
