@@ -42,8 +42,8 @@ The installer creates a fresh schema and has no DROP statements. If the schema a
 ## 4. Launch the Java application
 
 1. Double-click **Run-Gudo.bat**. On first launch it downloads Connector/J 9.4.0 into `lib` using curl.
-2. Type the MySQL password at the Java prompt and press Enter. Password characters are hidden.
-3. Choose **1**, then **3**, to view inventory. Use **5** for reports and **0** to exit.
+2. Type the MySQL password in the Swing connection dialog and click **OK**. Password characters are hidden.
+3. The app opens on **Records → Equipment**. Use **Reports** to browse live reports. Close the window to exit.
 
 If the driver download fails, get [mysql-connector-j-9.4.0.jar](https://repo.maven.apache.org/maven2/com/mysql/mysql-connector-j/9.4.0/mysql-connector-j-9.4.0.jar) directly and save it as `lib/mysql-connector-j-9.4.0.jar`. Launch the BAT once before class and keep the downloaded JAR with the project for offline use. Connector/J [installation reference](https://dev.mysql.com/doc/connectors/en/connector-j-installing.html).
 
@@ -55,7 +55,7 @@ set "DB_USER=root"
 Run-Gudo.bat
 ```
 
-Java also accepts `DB_PASSWORD` from the environment for scripted runs. For a live demo, use the hidden password prompt.
+Java also accepts `DB_PASSWORD` from the environment for scripted runs. For a live demo, use the password dialog.
 
 ## 5. Show data in Workbench
 
@@ -72,4 +72,4 @@ Optional ERD view: choose **Database > Reverse Engineer**, select the local conn
 | Unknown database | Run the complete `database.sql` import against the same server. |
 | Report view missing | Check Workbench Action Output. An incomplete import or historical Week 2 schema may have tables without views. |
 | No suitable driver | Confirm the downloaded file is a JAR at `lib/mysql-connector-j-9.4.0.jar`. Download it again if it was corrupt. |
-| Duplicate demo tag | Find the earlier demo row in Equipment, delete it by its ID if it is yours, or insert with a fresh tag. |
+| Duplicate demo tag | Find the earlier demo row in Equipment, select and delete it if it is yours, or insert with a fresh tag. |
