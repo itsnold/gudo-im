@@ -1,22 +1,43 @@
 import java.io.Console;
-import java.util.Arrays;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 public class Main {
+    private static final String SCHEMA = "campus_equipment_borrowing";
+    private static final Pattern SETUP_URL = Pattern.compile(
+            "(jdbc:mysql://[^/?]+/)" + SCHEMA + "(\\?.*)?");
+    private static final Pattern SQL_OBJECT = Pattern.compile("CREATE (TABLE|VIEW) (\\w+)");
     private static final Scanner input = new Scanner(System.in);
 
     public static void main(String[] args) {
         // Read connection settings from the environment, or use the local defaults.
         String url = System.getenv().getOrDefault("DB_URL",
-                "jdbc:mysql://127.0.0.1:3306/campus_equipment_borrowing");
+                "jdbc:mysql://127.0.0.1:3306/" + SCHEMA);
         String user = System.getenv().getOrDefault("DB_USER", "root");
         String password = databasePassword(user);
+
+        if (args.length == 1 && args[0].equals("--setup")) {
+            try {
+                setupDatabase(url, user, password);
+            } catch (IOException | SQLException e) {
+                System.err.println("Database setup failed: " + e.getMessage());
+                System.err.println("Check that the MySQL service is running and the account can create the schema.");
+                System.exit(1);
+            }
+        }
 
         // Connector/J opens the MySQL connection; try-with-resources closes it on exit.
         try (Connection connection = DriverManager.getConnection(url, user, password)) {
@@ -53,6 +74,61 @@ public class Main {
             System.out.println("Check that MySQL is running, the database exists, and your credentials and JDBC driver are correct.");
             System.exit(1);
         }
+    }
+
+    private static void setupDatabase(String url, String user, String password)
+            throws IOException, SQLException {
+        var target = SETUP_URL.matcher(url);
+        if (!target.matches()) {
+            throw new SQLException("DB_URL must point to the " + SCHEMA + " schema on your MySQL server.");
+        }
+        List<String> statements = readSetupStatements(Path.of("database.sql"));
+        String serverUrl = target.group(1) + (target.group(2) == null ? "" : target.group(2));
+        try (Connection connection = DriverManager.getConnection(serverUrl, user, password);
+             Statement statement = connection.createStatement()) {
+            try {
+                connection.setCatalog(SCHEMA);
+            } catch (SQLException e) {
+                if (e.getErrorCode() != 1049) throw e; // MySQL: unknown database
+                for (String sql : statements) {
+                    statement.execute(sql);
+                }
+                System.out.println("Installed the database and loaded the sample records.");
+                return;
+            }
+
+            try {
+                for (String sql : statements) {
+                    var object = SQL_OBJECT.matcher(sql);
+                    if (object.lookingAt()) {
+                        statement.execute("SELECT 1 FROM " + object.group(2) + " LIMIT 0");
+                    }
+                }
+            } catch (SQLException e) {
+                throw new SQLException("The existing database could not be verified. Its data was left intact. "
+                        + "See MYSQL_WORKBENCH_SETUP.md. MySQL says: " + e.getMessage(), e);
+            }
+            System.out.println("Found the existing database. Keeping its records.");
+        }
+    }
+
+    private static List<String> readSetupStatements(Path script) throws IOException {
+        List<String> statements = new ArrayList<>();
+        StringBuilder sql = new StringBuilder();
+        // database.sql uses standalone comment lines and ends each statement on its own line.
+        for (String line : Files.readAllLines(script)) {
+            String trimmed = line.strip();
+            if (trimmed.isEmpty() || trimmed.startsWith("--")) continue;
+            sql.append(line).append('\n');
+            if (trimmed.endsWith(";")) {
+                statements.add(sql.toString().stripTrailing());
+                sql.setLength(0);
+            }
+        }
+        if (sql.length() != 0 || statements.isEmpty()) {
+            throw new IOException("database.sql is empty or has an unfinished statement.");
+        }
+        return statements;
     }
 
     private static String databasePassword(String user) {

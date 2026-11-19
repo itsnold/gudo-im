@@ -1,5 +1,13 @@
 # MySQL Workbench setup on Windows
 
+## Fast path with MySQL already installed
+
+Extract the project, ensure the MySQL service is running, then double-click `Setup-Gudo.bat`. Enter the password for your existing MySQL account. Setup checks Java, attempts to install JDK 21 with WinGet if needed, downloads Connector/J, creates and seeds the project database if missing, then opens the app. An existing project database is checked and reused. If it is incomplete, setup stops so you can inspect it in Workbench.
+
+The setup uses `root` and `127.0.0.1:3306` by default. Use the connection variables in step 4 for a different user or port, and run `Setup-Gudo.bat` in that same Command Prompt. If WinGet is unavailable, install JDK 21 from step 1 before retrying. [Microsoft OpenJDK installation guide](https://learn.microsoft.com/java/openjdk/install).
+
+After setup succeeds, use `Run-Gudo.bat` for everyday launch. To view the data in Workbench, go to step 2 and then step 5. Steps 1–4 below also cover the manual setup path.
+
 ## 1. Install the three tools
 
 - [MySQL Community Server 8.4 LTS](https://dev.mysql.com/downloads/mysql/). Run MySQL Configurator after installation. For a local demo, use TCP port **3306**, set a root password you can remember, and configure MySQL as a Windows service. Start the service.

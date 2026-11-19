@@ -6,9 +6,9 @@ The Java console manages equipment inventory and displays six record tables and 
 
 ## Start here
 
-1. Follow [MYSQL_WORKBENCH_SETUP.md](MYSQL_WORKBENCH_SETUP.md) to set up JDK 21, MySQL 8.4, and Workbench.
-2. Import [database.sql](database.sql) once. It creates the six tables, sample records, and nine report views.
-3. Double-click [Run-Gudo.bat](Run-Gudo.bat) and enter your MySQL password.
+1. Extract the whole project. With MySQL Community Server installed and running, double-click [Setup-Gudo.bat](Setup-Gudo.bat). It finds Java 21 or attempts to install it with WinGet, downloads the JDBC driver, prepares the database, and opens the Java app.
+2. Enter your existing MySQL password once. If Windows asks for permission to install Java, approve the installer and let it finish.
+3. On later runs use [Run-Gudo.bat](Run-Gudo.bat). For Workbench or manual setup, use [MYSQL_WORKBENCH_SETUP.md](MYSQL_WORKBENCH_SETUP.md).
 4. Follow [Gudo_Demo_Guide.pdf](Gudo_Demo_Guide.pdf) for the live presentation.
 
 | File | Purpose |
