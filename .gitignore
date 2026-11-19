@@ -16,3 +16,7 @@ __pycache__/
 *.sqlite3
 .idea/
 .vscode/
+
+# Downloaded JDBC driver
+/lib/*.jar
+/lib/*.part
